@@ -1,19 +1,22 @@
 import { StorybookConfig } from "storybook-framework-qwik";
 
 const config: StorybookConfig = {
-  addons: ["@storybook/addon-links", "@storybook/addon-essentials"],
+  addons: [
+    "@storybook/addon-links",
+    "@storybook/addon-essentials",
+    "storybook-dark-mode",
+    "@storybook/addon-a11y",
+  ],
   framework: {
     name: "storybook-framework-qwik",
   },
-  core: {
-    renderer: "storybook-framework-qwik",
-  },
+  // core: {
+  //   renderer: "storybook-framework-qwik",
+  // },
   stories: [
-    // ...rootMain.stories,
     "../src/components/**/*.stories.mdx",
     "../src/components/**/*.stories.@(js|jsx|ts|tsx)",
   ],
-
   viteFinal: async (config: any) => {
     return config;
   },

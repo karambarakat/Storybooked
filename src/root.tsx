@@ -1,17 +1,17 @@
-import { Counter } from "./components/counter/counter";
-import { Logo } from "./components/logo/logo";
+import { component$, useSignal, useTask$ } from "@builder.io/qwik";
+import "virtual:uno.css";
+import "tailwindcss-preflight/preflight.css";
 
-export default () => {
+const styles = ":uno: h-screen w-screen";
+
+export default component$(() => {
   return (
     <>
       <head>
         <meta charSet="utf-8" />
         <title>Qwik Blank App</title>
       </head>
-      <body>
-        <Logo />
-        <Counter />
-      </body>
+      <body class={styles}>hello world</body>
     </>
   );
-};
+});

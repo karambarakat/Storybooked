@@ -1,0 +1,60 @@
+diff --git a/node_modules/@builder.io/qwik/core.d.ts b/node_modules/@builder.io/qwik/core.d.ts
+index f1f9781..868d290 100644
+--- a/node_modules/@builder.io/qwik/core.d.ts
++++ b/node_modules/@builder.io/qwik/core.d.ts
+@@ -4054,3 +4054,8 @@ export declare const _wrapProp: <T extends Record<any, any>, P extends keyof T>(
+ export declare const _wrapSignal: <T extends Record<any, any>, P extends keyof T>(obj: T, prop: P) => any;
+ 
+ export { }
++
++export declare const useDynStyles: (
++    strings: TemplateStringsArray,
++    ...values: any[]
++) => void;
+diff --git a/node_modules/@builder.io/qwik/core.mjs b/node_modules/@builder.io/qwik/core.mjs
+index a914229..ddde67e 100644
+--- a/node_modules/@builder.io/qwik/core.mjs
++++ b/node_modules/@builder.io/qwik/core.mjs
+@@ -9286,6 +9286,35 @@ const useStylesScopedQrl = (styles) => {
+  * @see `useStyles`
+  */
+ // </docs>
++
++/**
++ * 
++ * @param {TemplateStringsArray} tem 
++ * @param  {...any} vals 
++ */
++const useDynStyles = (tem, ...vals) => {
++    const { val, set, elCtx } = useSequentialScope();
++    if (val != null) {
++        return val;
++    }
++
++    const styleId = `dyn-${useId()}`;
++    const content = tem.reduce((acc, cur, idx) => {
++        return acc + cur + (vals[idx] || '');
++    }, '');
++
++    if (!elCtx.$appendStyles$) {
++        elCtx.$appendStyles$ = [];
++    }
++
++    elCtx.$appendStyles$.push({
++        styleId,
++        content,
++    });
++    
++    return set(styleId);
++}
++
+ const useStylesScoped$ = /*#__PURE__*/ implicit$FirstArg(useStylesScopedQrl);
+ const _useStyles = (styleQrl, transform, scoped) => {
+     assertQrl(styleQrl);
+@@ -9350,5 +9379,5 @@ const useErrorBoundary = () => {
+     return store;
+ };
+ 
+-export { $, Fragment, HTMLFragment, RenderOnce, Resource, SSRComment, SSRHint, SSRRaw, SSRStream, SSRStreamBlock, SkipRender, Slot, _IMMUTABLE, _deserializeData, _fnSignal, _getContextElement, _getContextEvent, _hW, _jsxBranch, _jsxC, _jsxQ, _jsxS, _noopQrl, _pauseFromContexts, _regSymbol, _renderSSR, _restProps, _serializeData, verifySerializable as _verifySerializable, _waitUntilRendered, _weakSerialize, _wrapProp, _wrapSignal, component$, componentQrl, createContextId, h as createElement, event$, eventQrl, getLocale, getPlatform, h, implicit$FirstArg, inlinedQrl, inlinedQrlDEV, isSignal, jsx, jsxDEV, jsx as jsxs, noSerialize, qrl, qrlDEV, render, setPlatform, untrack, useComputed$, useComputedQrl, useContext, useContextProvider, useErrorBoundary, useId, useLexicalScope, useOn, useOnDocument, useOnWindow, useResource$, useResourceQrl, useServerData, useSignal, useStore, useStyles$, useStylesQrl, useStylesScoped$, useStylesScopedQrl, useTask$, useTaskQrl, useVisibleTask$, useVisibleTaskQrl, version, withLocale };
++export { $, Fragment, HTMLFragment, RenderOnce, Resource, SSRComment, SSRHint, SSRRaw, SSRStream, SSRStreamBlock, SkipRender, Slot, useDynStyles, _IMMUTABLE, _deserializeData, _fnSignal, _getContextElement, _getContextEvent, _hW, _jsxBranch, _jsxC, _jsxQ, _jsxS, _noopQrl, _pauseFromContexts, _regSymbol, _renderSSR, _restProps, _serializeData, verifySerializable as _verifySerializable, _waitUntilRendered, _weakSerialize, _wrapProp, _wrapSignal, component$, componentQrl, createContextId, h as createElement, event$, eventQrl, getLocale, getPlatform, h, implicit$FirstArg, inlinedQrl, inlinedQrlDEV, isSignal, jsx, jsxDEV, jsx as jsxs, noSerialize, qrl, qrlDEV, render, setPlatform, untrack, useComputed$, useComputedQrl, useContext, useContextProvider, useErrorBoundary, useId, useLexicalScope, useOn, useOnDocument, useOnWindow, useResource$, useResourceQrl, useServerData, useSignal, useStore, useStyles$, useStylesQrl, useStylesScoped$, useStylesScopedQrl, useTask$, useTaskQrl, useVisibleTask$, useVisibleTaskQrl, version, withLocale };
+ //# sourceMappingURL=core.mjs.map

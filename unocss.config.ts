@@ -1,5 +1,6 @@
 // $ npm i -D unocss @unocss/preset-mini @unocss/reset @unocss/transformer-variant-group animated-unocss
 // uno.config.ts
+import myPreset from "./uno/preset";
 import { defineConfig } from "unocss";
 import transformerVariantGroup from "@unocss/transformer-variant-group";
 import presetMini from "@unocss/preset-mini";
@@ -9,47 +10,10 @@ import { animatedUno } from "animated-unocss";
 
 export default defineConfig({
   content: {
-    filesystem: ["src/**/*.{ts,tsx}"],
+    filesystem: ["src/**/*.{ts,tsx}", ".storybook/*.{ts,tsx}"],
   },
   shortcuts: [],
-  rules: [
-    [
-      "isolate",
-      {
-        isolation: "isolate",
-      },
-    ],
-    [
-      "truncate",
-      {
-        "white-space": "nowrap",
-        overflow: "hidden",
-        "text-overflow": "ellipsis",
-      },
-    ],
-    [
-      "sr-only",
-      {
-        position: "absolute",
-        width: "1px",
-        height: "1px",
-        padding: "0",
-        margin: "-1px",
-        overflow: "hidden",
-        clip: "rect(0, 0, 0, 0)",
-        whiteSpace: "nowrap",
-        borderWidth: "0",
-      },
-    ],
-    ["w-fit", { width: "fit-content" }],
-    ["h-fit", { height: "fit-content" }],
-    ["w-min", { width: "min-content" }],
-    ["h-min", { height: "min-content" }],
-    ["w-max", { width: "max-content" }],
-    ["h-max", { height: "max-content" }],
-
-    ["invert", { filter: "invert(1)" }],
-  ],
+  rules: [],
   theme: {
     breakpoints: {
       sm: "640px",
@@ -64,8 +28,9 @@ export default defineConfig({
   ],
   transformers: [transformerVariantGroup(), transformerCompileClass()],
   presets: [
+    myPreset({}),
     presetMini({
-      dark: "media",
+      dark: "class",
     }),
     animatedUno(),
   ],
