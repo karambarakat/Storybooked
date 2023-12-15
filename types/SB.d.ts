@@ -5,6 +5,19 @@ import { updateStore } from "storybook-dark-mode/dist/ts/Tool";
 export interface _Parameter {
   layout?: "fullscreen" | "centered";
   darkMode?: Partial<Parameters<typeof updateStore>[0]>;
+  viewport?: {
+    defaultViewport?: "mobile1" | "mobile2" | "tablet" | "viewport";
+    defaultOrientation?: "portrait" | "landscape";
+    disable?: boolean;
+    viewports?: Record<
+      string,
+      {
+        name: string;
+        styles: Record<string, string>;
+        type?: "mobile" | "desktop" | "tablet";
+      }
+    >;
+  };
 }
 
 export type _Tags = "autodocs";
@@ -24,7 +37,7 @@ declare global {
       __Meta<C>,
       "parameters" | "tags"
     > & {
-      parameters?: Parameter;
+      parameters?: _Parameter;
       tags?: _Tags[];
     };
 
@@ -32,7 +45,7 @@ declare global {
       StoryObj<C>,
       "parameters" | "tags"
     > & {
-      parameters?: Parameter;
+      parameters?: _Parameter;
       tags?: _Tags[];
     };
 
