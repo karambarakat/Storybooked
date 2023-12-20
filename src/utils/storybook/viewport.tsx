@@ -12,3 +12,7 @@ export const withWidth = (width: number) => {
     },
   };
 };
+
+export const render = (props: any, ctx: any) => {
+  return <ctx.parameters.Render {...props} />;
+};

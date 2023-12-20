@@ -2,50 +2,50 @@ import {
   Signal,
   noSerialize,
   useComputed$,
-  useDynStyles,
+  useStylesServer,
   useId,
   useSignal,
-} from "@builder.io/qwik";
-import useMediaQuery from "../../hooks/useMediaQuery";
+} from '@builder.io/qwik'
+import useMediaQuery from '../../hooks/useMediaQuery'
 
 type ClassNames = {
-  main: string;
-  side: string;
-  side_inner: string;
-  content: string;
-};
+  main: string
+  side: string
+  side_inner: string
+  content: string
+}
 
 type Width = {
-  w_1st: string;
-  w_2nd: string;
-};
+  w_1st: string
+  w_2nd: string
+}
 
 type Breakpoints = {
-  bp_1st: number;
-  bp_2nd: number;
-};
+  bp_1st: number
+  bp_2nd: number
+}
 
 type Meta = {
-  classNames: ClassNames;
-  breakpoints: Breakpoints;
-  width: Width;
-};
+  classNames: ClassNames
+  breakpoints: Breakpoints
+  width: Width
+}
 
 export const useData = () => {
-  const id = useId().replace(/-/g, "_").replace(/^\d/, "a");
+  const id = useId().replace(/-/g, '_').replace(/^\d/, 'a')
 
-  const main = `main-${id}`;
-  const side = `side-${id}`;
-  const side_inner = `side-inner-${id}`;
-  const content = `content-${id}`;
+  const main = `main-${id}`
+  const side = `side-${id}`
+  const side_inner = `side-inner-${id}`
+  const content = `content-${id}`
 
-  return { classNames: { main, side, side_inner, content } };
-};
+  return { classNames: { main, side, side_inner, content } }
+}
 
 export const useBasicStructure = ({
   classNames: cn,
-}: Pick<Meta, "classNames">) => {
-  useDynStyles`
+}: Pick<Meta, 'classNames'>) => {
+  useStylesServer`
       .${cn.main} {
         display: flex;
         align-items: stretch;
@@ -61,65 +61,67 @@ export const useBasicStructure = ({
       .${cn.side_inner} > *, .${cn.content} > * {
         height: 100%;
       }
-    `;
-};
+    `
+}
 
 export const useResponsive = ({
   width: w,
   classNames: cn,
   breakpoints: bp,
 }: Meta) => {
-  useDynStyles`
+  useStylesServer`
       .${cn.side} {
         --w-1st: ${w.w_1st};
         --w-2nd: ${w.w_2nd};
         width: var(--w-1st);
       } 
   
-      @media (min-width: ${bp.bp_2nd}px) {
+      @media (min-width: ${String(bp.bp_2nd)}px) {
         .${cn.side} {
           width: var(--w-2nd);
         }
       }
-      @media (max-width: ${bp.bp_1st - 1}px) {
+      @media (max-width: ${String(bp.bp_1st - 1)}px) {
         .${cn.side} {
           width: 0;
         }
       }
-  `;
-};
+  `
+}
 
 export const useExpandOnHover = (
-  strategy: "expand" | "slide",
-  { classNames: c, breakpoints: bp, width }: Meta
+  strategy: 'expand' | 'slide',
+  { classNames: c, breakpoints: bp, width }: Meta,
 ) => {
   const sideStyle =
-    strategy === "slide"
+    strategy === 'slide'
       ? `
     .${c.side}[data-hover] {
         width: fit-content;
     }`
-      : "";
-  useDynStyles`
-    @media (min-width: ${bp.bp_1st}px) AND (max-width: ${bp.bp_2nd - 1}px) {
+      : ''
+  useStylesServer`
+    @media (min-width: ${String(bp.bp_1st)}px) AND (max-width: ${String(
+      bp.bp_2nd - 1,
+    )}px) {
       ${sideStyle}
     .${c.side}[data-hover] .${c.side_inner} {    
     width: ${width.w_2nd};
     }
-  `;
-};
+  `
+}
 
 export const useForceWidth = (
   { classNames, width, breakpoints }: Meta,
-  strategy: Signal<"auto" | "open" | "close">
+  strategy: Signal<'auto' | 'open' | 'close'>,
 ) => {
   //   const strategy: "auto" | "open" | "close" = "auto";
 
   const small = useMediaQuery(
-    noSerialize(() => `(max-width: ${breakpoints.bp_1st - 1}px)`)
-  );
+    noSerialize(() => `(max-width: ${breakpoints.bp_1st - 1}px)`),
+  )
 
-  useDynStyles`
+  useStylesServer`
     .${classNames.side}[data-force="w_1st"] {
       width: ${width.w_1st};
     }
@@ -129,15 +131,15 @@ export const useForceWidth = (
     .${classNames.side}[data-force="w_2nd"] {
       width: ${width.w_2nd};
     }
-  `;
+  `
 
   const force = useComputed$(() => {
-    return strategy.value === "auto" || small.value
+    return strategy.value === 'auto' || small.value
       ? false
-      : strategy.value === "open"
-        ? "w_2nd"
-        : "w_1st";
-  });
+      : strategy.value === 'open'
+        ? 'w_2nd'
+        : 'w_1st'
+  })
 
-  return { force };
-};
+  return { force }
+}

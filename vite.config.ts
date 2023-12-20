@@ -3,7 +3,7 @@ import pkg from "./package.json";
 import { qwikVite } from "@builder.io/qwik/optimizer";
 import tsconfigPaths from "vite-tsconfig-paths";
 import UnoCSS from "unocss/vite";
-
+import { vanillaExtractPlugin } from "styled-vanilla-extract/vite";
 const { dependencies = {}, peerDependencies = {} } = pkg as any;
 const makeRegex = (dep) => new RegExp(`^${dep}(/.*)?$`);
 const excludeAll = (obj) => Object.keys(obj).map(makeRegex);
@@ -26,6 +26,6 @@ export default defineConfig(() => {
         ],
       },
     },
-    plugins: [qwikVite(), tsconfigPaths(), UnoCSS()],
+    plugins: [qwikVite(), tsconfigPaths(), UnoCSS(), vanillaExtractPlugin()],
   };
 });

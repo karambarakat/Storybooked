@@ -1,21 +1,137 @@
+diff --git a/node_modules/@builder.io/qwik/core.cjs b/node_modules/@builder.io/qwik/core.cjs
+index ba9cf3d..1c79819 100644
+--- a/node_modules/@builder.io/qwik/core.cjs
++++ b/node_modules/@builder.io/qwik/core.cjs
+@@ -9330,6 +9330,29 @@ Task Symbol: ${task.$qrl$.$symbol$}
+         return styleId;
+     };
+ 
++    const useServerStyle = (tem, ...vals) => {
++        const { val, set, elCtx } = useSequentialScope();
++        if (val != null) {
++            return val;
++        }
++    
++        const styleId = `dyn-${useId()}`;
++        const content = tem.reduce((acc, cur, idx) => {
++            return acc + cur + (vals[idx] || '');
++        }, '');
++    
++        if (!elCtx.$appendStyles$) {
++            elCtx.$appendStyles$ = [];
++        }
++    
++        elCtx.$appendStyles$.push({
++            styleId,
++            content,
++        });
++        
++        return set(styleId);
++    }
++    
+     /** @public */
+     const useSignal = (initialState) => {
+         const { val, set, iCtx } = useSequentialScope();
+@@ -9430,6 +9453,9 @@ Task Symbol: ${task.$qrl$.$symbol$}
+     exports.useStylesScopedQrl = useStylesScopedQrl;
+     exports.useTask$ = useTask$;
+     exports.useTaskQrl = useTaskQrl;
++
++    exports.useServerStyle = useServerStyle;
++
+     exports.useVisibleTask$ = useVisibleTask$;
+     exports.useVisibleTaskQrl = useVisibleTaskQrl;
+     exports.version = version;
 diff --git a/node_modules/@builder.io/qwik/core.d.ts b/node_modules/@builder.io/qwik/core.d.ts
-index f1f9781..868d290 100644
+index f1f9781..aafc5ee 100644
 --- a/node_modules/@builder.io/qwik/core.d.ts
 +++ b/node_modules/@builder.io/qwik/core.d.ts
-@@ -4054,3 +4054,8 @@ export declare const _wrapProp: <T extends Record<any, any>, P extends keyof T>(
+@@ -2728,6 +2728,14 @@ export declare const Slot: FunctionComponent<{
+     name?: string;
+ }>;
+ 
++/**
++ * Allows to project the children of the current component. <Slot/> can only be used within the
++ * context of a component defined with `component$`.
++ *
++ * @public
++ */
++export declare const SlotCustom: FunctionComponent<Record<string, any>>;
++
+ /** @public */
+ export declare interface SlotHTMLAttributes<T extends Element> extends HTMLAttributes<T> {
+     name?: string | undefined;
+@@ -4054,3 +4062,8 @@ export declare const _wrapProp: <T extends Record<any, any>, P extends keyof T>(
  export declare const _wrapSignal: <T extends Record<any, any>, P extends keyof T>(obj: T, prop: P) => any;
  
  export { }
 +
-+export declare const useDynStyles: (
++export declare const useServerStyles: (
 +    strings: TemplateStringsArray,
 +    ...values: any[]
 +) => void;
+\ No newline at end of file
 diff --git a/node_modules/@builder.io/qwik/core.mjs b/node_modules/@builder.io/qwik/core.mjs
-index a914229..ddde67e 100644
+index a914229..1e331ce 100644
 --- a/node_modules/@builder.io/qwik/core.mjs
 +++ b/node_modules/@builder.io/qwik/core.mjs
-@@ -9286,6 +9286,35 @@ const useStylesScopedQrl = (styles) => {
+@@ -4390,6 +4390,7 @@ const _jsxS = (type, mutableProps, immutableProps, flags, key, dev) => {
+  * Create a JSXNode for any tag, with possibly immutable props embedded in props
+  */
+ const _jsxC = (type, mutableProps, flags, key, dev) => {
++
+     const processed = key == null ? null : String(key);
+     const props = mutableProps ?? EMPTY_OBJ;
+     // In dynamic components, type could be a string
+@@ -7350,6 +7351,47 @@ const Slot = (props) => {
+     }, 0, props.name ?? '');
+ };
+ 
++/**
++ * Allows to project the children of the current component. <Slot/> can only be used within the
++ * context of a component defined with `component$`.
++ *
++ * @public
++ */
++const SlotCustom = (props) => {
++    return SlotJsx(Virtual, {
++        [QSlotS]: '',
++    }, 0, props.name ?? '');
++};
++
++const SlotJsx = (type, mutableProps, flags, key, dev) => {
++    console.log("custom slot")
++
++    const processed = key == null ? null : String(key);
++    const props = mutableProps ?? EMPTY_OBJ;
++    const node = new JSXNodeImpl(
++        type, 
++        props, 
++        null, 
++        props.children, 
++        flags, 
++        processed
++    );
++    if (typeof type === 'string' && mutableProps) {
++        delete mutableProps.children;
++    }
++    if (qDev && dev) {
++        node.dev = {
++            stack: new Error().stack,
++            ...dev,
++        };
++    }
++    validateJSXNode(node);
++    seal(node);
++    return node;
++};
++
++
++
+ /**
+  * - 0, 8, 9, A, B, C, D
+  * - `\0`: null character (U+0000 NULL) (only if the next character is not a decimal digit; else it’s
+@@ -9286,6 +9328,35 @@ const useStylesScopedQrl = (styles) => {
   * @see `useStyles`
   */
  // </docs>
@@ -25,7 +141,7 @@ index a914229..ddde67e 100644
 + * @param {TemplateStringsArray} tem 
 + * @param  {...any} vals 
 + */
-+const useDynStyles = (tem, ...vals) => {
++const useServerStyle = (tem, ...vals) => {
 +    const { val, set, elCtx } = useSequentialScope();
 +    if (val != null) {
 +        return val;
@@ -51,10 +167,14 @@ index a914229..ddde67e 100644
  const useStylesScoped$ = /*#__PURE__*/ implicit$FirstArg(useStylesScopedQrl);
  const _useStyles = (styleQrl, transform, scoped) => {
      assertQrl(styleQrl);
-@@ -9350,5 +9379,5 @@ const useErrorBoundary = () => {
+@@ -9350,5 +9421,9 @@ const useErrorBoundary = () => {
      return store;
  };
  
 -export { $, Fragment, HTMLFragment, RenderOnce, Resource, SSRComment, SSRHint, SSRRaw, SSRStream, SSRStreamBlock, SkipRender, Slot, _IMMUTABLE, _deserializeData, _fnSignal, _getContextElement, _getContextEvent, _hW, _jsxBranch, _jsxC, _jsxQ, _jsxS, _noopQrl, _pauseFromContexts, _regSymbol, _renderSSR, _restProps, _serializeData, verifySerializable as _verifySerializable, _waitUntilRendered, _weakSerialize, _wrapProp, _wrapSignal, component$, componentQrl, createContextId, h as createElement, event$, eventQrl, getLocale, getPlatform, h, implicit$FirstArg, inlinedQrl, inlinedQrlDEV, isSignal, jsx, jsxDEV, jsx as jsxs, noSerialize, qrl, qrlDEV, render, setPlatform, untrack, useComputed$, useComputedQrl, useContext, useContextProvider, useErrorBoundary, useId, useLexicalScope, useOn, useOnDocument, useOnWindow, useResource$, useResourceQrl, useServerData, useSignal, useStore, useStyles$, useStylesQrl, useStylesScoped$, useStylesScopedQrl, useTask$, useTaskQrl, useVisibleTask$, useVisibleTaskQrl, version, withLocale };
-+export { $, Fragment, HTMLFragment, RenderOnce, Resource, SSRComment, SSRHint, SSRRaw, SSRStream, SSRStreamBlock, SkipRender, Slot, useDynStyles, _IMMUTABLE, _deserializeData, _fnSignal, _getContextElement, _getContextEvent, _hW, _jsxBranch, _jsxC, _jsxQ, _jsxS, _noopQrl, _pauseFromContexts, _regSymbol, _renderSSR, _restProps, _serializeData, verifySerializable as _verifySerializable, _waitUntilRendered, _weakSerialize, _wrapProp, _wrapSignal, component$, componentQrl, createContextId, h as createElement, event$, eventQrl, getLocale, getPlatform, h, implicit$FirstArg, inlinedQrl, inlinedQrlDEV, isSignal, jsx, jsxDEV, jsx as jsxs, noSerialize, qrl, qrlDEV, render, setPlatform, untrack, useComputed$, useComputedQrl, useContext, useContextProvider, useErrorBoundary, useId, useLexicalScope, useOn, useOnDocument, useOnWindow, useResource$, useResourceQrl, useServerData, useSignal, useStore, useStyles$, useStylesQrl, useStylesScoped$, useStylesScopedQrl, useTask$, useTaskQrl, useVisibleTask$, useVisibleTaskQrl, version, withLocale };
++export { $, Fragment, HTMLFragment, RenderOnce, Resource, SSRComment, SSRHint, SSRRaw, SSRStream, SSRStreamBlock, SkipRender, Slot, 
++    useServerStyle,
++    SlotCustom,
++_IMMUTABLE, _deserializeData, _fnSignal, _getContextElement, _getContextEvent, _hW, _jsxBranch, _jsxC, _jsxQ, _jsxS, _noopQrl, _pauseFromContexts, _regSymbol, _renderSSR, _restProps, _serializeData, verifySerializable as _verifySerializable, _waitUntilRendered, _weakSerialize, _wrapProp, _wrapSignal, component$, componentQrl, createContextId, h as createElement, event$, eventQrl, getLocale, getPlatform, h, implicit$FirstArg, inlinedQrl, inlinedQrlDEV, isSignal, jsx, jsxDEV, jsx as jsxs, noSerialize, qrl, qrlDEV, render, setPlatform, untrack, useComputed$, useComputedQrl, useContext, useContextProvider, useErrorBoundary, useId, useLexicalScope, useOn, useOnDocument, useOnWindow, useResource$, useResourceQrl, useServerData, useSignal, useStore, useStyles$, useStylesQrl, useStylesScoped$, useStylesScopedQrl, useTask$, useTaskQrl, useVisibleTask$, useVisibleTaskQrl, version, withLocale };
  //# sourceMappingURL=core.mjs.map
++

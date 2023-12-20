@@ -3,7 +3,7 @@ import { withWidth } from "../../utils/storybook/viewport";
 import { userEvent, within } from "@storybook/testing-library";
 
 export default {
-  title: "AppShell/AppShell",
+  title: "AppShell",
   parameters: {
     layout: "fullscreen",
   },

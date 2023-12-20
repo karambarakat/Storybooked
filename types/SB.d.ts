@@ -1,8 +1,10 @@
 import type { Meta as _Meta, StoryObj } from "storybook-framework-qwik";
 import { Meta as __Meta } from "storybook-framework-qwik/*";
 import { updateStore } from "storybook-dark-mode/dist/ts/Tool";
+import { component$ } from "@builder.io/qwik";
 
 export interface _Parameter {
+  Render?: ReturnType<component$>;
   layout?: "fullscreen" | "centered";
   darkMode?: Partial<Parameters<typeof updateStore>[0]>;
   viewport?: {

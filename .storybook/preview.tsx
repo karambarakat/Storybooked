@@ -61,8 +61,18 @@ const Mode = component$(() => {
     });
   });
 
+  useStyles$(`
+    body.dark{
+      background: rgb(24 24 27);
+      color: rgb(229 231 235);
+    }
+    body{
+      background: rgb(255 255 255)
+    }
+  `);
+
   return (
-    <div class="dark:bg-zinc-900 dark:text-white min-h-screen flex">
+    <>
       <script
         dangerouslySetInnerHTML={`
 const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -71,6 +81,6 @@ document.head.classList.add(darkModeOn ? "dark" : "light");
       `}
       />
       <Slot />
-    </div>
+    </>
   );
 });

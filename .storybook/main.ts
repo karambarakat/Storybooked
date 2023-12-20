@@ -16,6 +16,8 @@ const config: StorybookConfig = {
   stories: [
     "../src/components/**/*.stories.mdx",
     "../src/components/**/*.stories.@(js|jsx|ts|tsx)",
+    "../src/components/**/stories.@(js|jsx|ts|tsx)",
+    "../src/hooks/**/*.stories.@(js|jsx|ts|tsx)",
   ],
   viteFinal: async (config: any) => {
     return config;
